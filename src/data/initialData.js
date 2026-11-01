@@ -1,22 +1,18 @@
-// Data Awal Berdasarkan PRD (Model Data MySQL Bagian 9 & Kontrak REST API Bagian 8.4)
+// Data Awal Portfolio
 export const initialProfile = {
   id: 1,
-  full_name: "Alifian Ramadhan",
+  full_name: "Rahman Kurniawan",
   headline: "Junior Full-Stack Web Developer & UI Designer",
   short_bio: "Mahasiswa tingkat akhir Manajemen Informatika yang berfokus pada rancang bangun aplikasi web modern, performa tinggi, dan antarmuka ramah pengguna.",
-  about_content: `Saya adalah seorang pengembang web yang passionate dalam mengubah permasalahan bisnis dan kebutuhan pengguna menjadi produk digital yang intuitif serta efisien.
-
-Dengan latar belakang akademik di bidang Manajemen Informatika dan pengalaman mengerjakan proyek perangkat lunak dari hulu ke hilir, saya terbiasa membangun arsitektur RESTful API yang aman dengan Node.js & Express, mengelola basis data relasional MySQL, serta menyusun antarmuka modern yang responsif menggunakan React.
-
-Prinsip kerja saya berakar pada kode yang bersih (clean code), dokumentasi yang rapi, dan empati mendalam terhadap kenyamanan interaksi pengguna akhir (user-centric experience).`,
+  about_content: `Saya adalah seorang pengembang web yang passionate dalam mengubah permasalahan bisnis dan kebutuhan pengguna menjadi produk digital yang intuitif serta efisien. Dengan latar belakang akademik di bidang Manajemen Informatika dan pengalaman mengerjakan proyek perangkat lunak dari hulu ke hilir, saya terbiasa membangun arsitektur RESTful API yang aman dengan Node.js & Express, mengelola basis data relasional MySQL/Supabase, serta menyusun antarmuka modern yang responsif menggunakan React.Prinsip kerja saya berakar pada kode yang bersih (clean code), dokumentasi yang rapi, dan empati mendalam terhadap kenyamanan interaksi pengguna akhir (user-centric experience).`,
   profile_image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
-  cv_url: "#download-cv",
-  public_email: "alifian.work@example.com",
-  location: "Surabaya, Indonesia",
+  cv_url: "https://drive.google.com/file/d/1e13ZYgw-XXq4CSHGpHQm-SP7Kr4H8-gO/view?usp=drivesdk",
+  public_email: "rahmankur907@gmail.com",
+  location: "Surakarta, Indonesia",
   availability: "Tersedia untuk Magang & Full-time",
   response_time: "Merespons dalam < 24 jam",
-  github_username: "alifianramadhan",
-  linkedin_username: "alifian-ramadhan",
+  github_username: "rahmankur123",
+  linkedin_username: "rahman-kurniawan",
   experience_years: "2+ Tahun Belajar & Eksplorasi Proyek",
   completed_projects_count: 8
 };
@@ -123,12 +119,12 @@ export const initialSkillCategories = [
     sort_order: 1,
     is_visible: true,
     skills: [
-      { id: 101, name: "React.js", proficiency: "Mahir", icon: "Code2", note: "Komponen fungsional, custom hooks, context, state management modern" },
-      { id: 102, name: "JavaScript (ES6+)", proficiency: "Mahir", icon: "FileCode", note: "Async/await, closures, manipulasi DOM, modul modular" },
-      { id: 103, name: "HTML5 & Semantic Web", proficiency: "Mahir", icon: "Layout", note: "Struktur semantik, aksesibilitas (a11y), SEO on-page" },
-      { id: 104, name: "Modern CSS & Responsive", proficiency: "Mahir", icon: "Palette", note: "Flexbox, CSS Grid, media queries, CSS variables, micro-animations" },
-      { id: 105, name: "Vite & Tooling", proficiency: "Mahir", icon: "Zap", note: "Build bundling cepat, environment setup, hot module replacement" },
-      { id: 106, name: "TypeScript", proficiency: "Cukup", icon: "Terminal", note: "Interface dasar, typing props, type-safety pada komponen" }
+      { id: 101, name: "HTML5 & Semantic Web", percentage: 95, proficiency: "Mahir", icon: "Layout", note: "Struktur semantik terstandar, aksesibilitas (a11y), validasi W3C, dan SEO on-page" },
+      { id: 102, name: "Modern CSS3 & Responsive", percentage: 92, proficiency: "Mahir", icon: "Palette", note: "Flexbox, CSS Grid, media queries, animasi micro-interaction, dan Tailwind CSS" },
+      { id: 103, name: "React.js", percentage: 90, proficiency: "Mahir", icon: "Code2", note: "Komponen fungsional, custom hooks, context, state management modern, dan Vite" },
+      { id: 104, name: "JavaScript (ES6+)", percentage: 88, proficiency: "Mahir", icon: "FileCode", note: "Async/await, closures, manipulasi DOM, modul modular, dan integrasi API" },
+      { id: 105, name: "Vite & Tooling", percentage: 85, proficiency: "Mahir", icon: "Zap", note: "Build bundling cepat, environment setup, hot module replacement" },
+      { id: 106, name: "TypeScript", percentage: 75, proficiency: "Cukup", icon: "Terminal", note: "Interface deklaratif, typing props, type-safety pada komponen dan data model" }
     ]
   },
   {
@@ -138,11 +134,11 @@ export const initialSkillCategories = [
     sort_order: 2,
     is_visible: true,
     skills: [
-      { id: 201, name: "Node.js & Express", proficiency: "Mahir", icon: "Server", note: "Routing RESTful, middleware, error handling terpusat, validasi input" },
-      { id: 202, name: "MySQL & SQL Query", proficiency: "Mahir", icon: "Database", note: "Normalisasi tabel, foreign key, indexing, relasi many-to-many, parameterized queries" },
-      { id: 203, name: "RESTful API Architecture", proficiency: "Mahir", icon: "Globe", note: "Standar HTTP status, endpoint terstruktur, data sanitization, stateless auth" },
-      { id: 204, name: "JWT & Auth Security", proficiency: "Cukup", icon: "ShieldCheck", note: "Token generation, password hashing dengan bcrypt, proteksi endpoint admin" },
-      { id: 205, name: "Prisma ORM", proficiency: "Cukup", icon: "Layers", note: "Skema deklaratif, relasi model, migrasi versioned database" }
+      { id: 201, name: "Node.js & Express", percentage: 86, proficiency: "Mahir", icon: "Server", note: "Routing RESTful, middleware, error handling terpusat, validasi input" },
+      { id: 202, name: "MySQL & SQL Query", percentage: 85, proficiency: "Mahir", icon: "Database", note: "Normalisasi tabel, foreign key, indexing, relasi many-to-many, parameterized queries" },
+      { id: 203, name: "RESTful API Architecture", percentage: 88, proficiency: "Mahir", icon: "Globe", note: "Standar HTTP status, endpoint terstruktur, data sanitization, stateless auth" },
+      { id: 204, name: "JWT & Auth Security", percentage: 78, proficiency: "Cukup", icon: "ShieldCheck", note: "Token generation, password hashing dengan bcrypt, proteksi endpoint admin" },
+      { id: 205, name: "Prisma ORM", percentage: 72, proficiency: "Cukup", icon: "Layers", note: "Skema deklaratif, relasi model, migrasi versioned database" }
     ]
   },
   {
@@ -152,11 +148,11 @@ export const initialSkillCategories = [
     sort_order: 3,
     is_visible: true,
     skills: [
-      { id: 301, name: "Git & GitHub", proficiency: "Mahir", icon: "GitBranch", note: "Branching model, pull request, merge conflict resolution, semantic commit" },
-      { id: 302, name: "Postman", proficiency: "Mahir", icon: "Send", note: "API collection testing, mock servers, automated environment variables" },
-      { id: 303, name: "Figma to Code", proficiency: "Mahir", icon: "Figma", note: "Interpretasi autolayout, ekstraksi token warna, typografi, dan icon asset" },
-      { id: 304, name: "VS Code & Linting", proficiency: "Mahir", icon: "Code", note: "Setup ESLint, prettier, debugging browser tools, ekstensi produktif" },
-      { id: 305, name: "Linux & Deploy Basics", proficiency: "Cukup", icon: "Cpu", note: "Terminal bash, manajemen package, dasar VPS, PM2, dan static hosting" }
+      { id: 301, name: "Git & GitHub", percentage: 90, proficiency: "Mahir", icon: "GitBranch", note: "Branching model, pull request, merge conflict resolution, semantic commit" },
+      { id: 302, name: "Postman", percentage: 86, proficiency: "Mahir", icon: "Send", note: "API collection testing, mock servers, automated environment variables" },
+      { id: 303, name: "Figma to Code", percentage: 88, proficiency: "Mahir", icon: "Figma", note: "Interpretasi autolayout, ekstraksi token warna, tipografi, dan aset ikon" },
+      { id: 304, name: "VS Code & Linting", percentage: 92, proficiency: "Mahir", icon: "Code", note: "Setup ESLint, prettier, debugging browser tools, ekstensi produktif" },
+      { id: 305, name: "Linux & Deploy Basics", percentage: 70, proficiency: "Cukup", icon: "Cpu", note: "Terminal bash, manajemen package, dasar VPS, PM2, dan static hosting" }
     ]
   }
 ];
@@ -177,7 +173,7 @@ export const initialProjects = [
       {
         id: 1,
         title: "Pemisahan Status Publikasi dan Live Demo",
-        description: "Menerapkan aturan bisnis PRD: hanya proyek berstatus PUBLISHED dan demo ONLINE dengan URL valid yang menampilkan tombol Live Demo fungsional."
+        description: "Hanya proyek berstatus PUBLISHED dan demo ONLINE dengan URL valid yang menampilkan tombol Live Demo fungsional secara interaktif."
       },
       {
         id: 2,
@@ -382,7 +378,7 @@ export const initialProjects = [
     live_url: "",
     repository_url: "https://github.com/alifianramadhan/ecosmart-tracker",
     demo_status: "NOT_AVAILABLE",
-    publication_status: "DRAFT", // Catatan PRD: Status DRAFT TIDAK boleh muncul di halaman publik!
+    publication_status: "DRAFT", // Draft: tidak tampil di halaman publik
     is_featured: false,
     published_at: null,
     sort_order: 5,
@@ -394,20 +390,23 @@ export const initialProjects = [
 export const initialSocialLinks = [
   { id: 1, platform: "GitHub", label: "github.com/alifianramadhan", url: "https://github.com", sort_order: 1, is_visible: true, icon: "Github" },
   { id: 2, platform: "LinkedIn", label: "linkedin.com/in/alifian-ramadhan", url: "https://linkedin.com", sort_order: 2, is_visible: true, icon: "Linkedin" },
-  { id: 3, platform: "Email", label: "alifian.work@example.com", url: "mailto:alifian.work@example.com", sort_order: 3, is_visible: true, icon: "Mail" },
-  { id: 4, platform: "Instagram", label: "@alifian.dev", url: "https://instagram.com", sort_order: 4, is_visible: true, icon: "Instagram" }
+  { id: 3, platform: "Instagram", label: "@alifian.dev", url: "https://instagram.com", sort_order: 3, is_visible: true, icon: "Instagram" },
+  { id: 4, platform: "WhatsApp", label: "Chat WhatsApp", url: "https://wa.me/6281234567890", sort_order: 4, is_visible: true, icon: "WhatsApp" },
+  { id: 5, platform: "Twitter", label: "@alifian_dev", url: "https://twitter.com", sort_order: 5, is_visible: true, icon: "Twitter" },
+  { id: 6, platform: "Email", label: "alifian.work@example.com", url: "mailto:alifian.work@example.com", sort_order: 6, is_visible: true, icon: "Mail" }
 ];
 
 export const initialSiteSettings = {
-  site_title: "Alifian Ramadhan — Personal Portfolio",
-  owner_name: "Alifian Ramadhan",
+  site_title: "Rahman Kurniawan — Personal Portfolio",
+  owner_name: "Rahman Kurniawan",
   hero_greeting: "Halo, Selamat Datang 👋",
   hero_badge_text: "Tersedia untuk Peluang Baru & Magang",
   hero_headline_prefix: "Membangun Solusi Web yang",
   hero_headline_highlight: "Bermakna, Bersih & Terukur",
   hero_subheadline: "Saya menggabungkan ketelitian rekayasa sistem basis data dengan estetika antarmuka front-end yang modern untuk menghasilkan produk digital berkualitas tinggi.",
   copyright_year: 2026,
-  footer_text: "Dirancang & dibangun dengan dedikasi penuh mengacu pada standar PRD Portfolio CMS.",
+  footer_text: "Dirancang & dibangun dengan dedikasi penuh untuk hasil yang profesional.",
+  footer_copyright: "© 2026 Rahman Kurniawan. Seluruh Hak Cipta Dilindungi.",
   maintenance_notice: "Sistem Live Demo dimonitor secara berkala untuk menjaga stabilitas tautan eksternal."
 };
 

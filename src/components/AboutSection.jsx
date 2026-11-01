@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Code,
   Database,
@@ -11,6 +11,31 @@ import {
 } from './Icons';
 
 export default function AboutSection({ profile }) {
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    const section = sectionRef.current;
+    if (section) {
+      const revealElements = section.querySelectorAll(
+        '.scroll-reveal, .scroll-reveal-left, .scroll-reveal-right'
+      );
+      revealElements.forEach((el) => observer.observe(el));
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   const pillars = [
     {
       icon: Code,
@@ -30,10 +55,10 @@ export default function AboutSection({ profile }) {
   ];
 
   return (
-    <section id="about" className="section about-section">
+    <section id="about" className="section about-section" ref={sectionRef}>
       <div className="container">
         {/* Header */}
-        <div className="section-header">
+        <div className="section-header scroll-reveal">
           <div className="section-tag">
             <Sparkles size={14} />
             <span>Tentang Saya</span>
@@ -48,7 +73,7 @@ export default function AboutSection({ profile }) {
         <div className="about-grid">
           {/* Left: Biography Paragraphs */}
           <div className="about-bio-column">
-            <div className="bio-card card">
+            <div className="bio-card card scroll-reveal-left">
               <h3 className="bio-card-title">Biografi Profesional</h3>
               <div className="bio-content">
                 {profile?.about_content ? (
@@ -91,7 +116,11 @@ export default function AboutSection({ profile }) {
               {pillars.map((pillar, i) => {
                 const IconComponent = pillar.icon;
                 return (
-                  <div key={i} className="pillar-card card">
+                  <div
+                    key={i}
+                    className="pillar-card card scroll-reveal-right"
+                    style={{ transitionDelay: `${i * 120}ms` }}
+                  >
                     <div className="pillar-icon-box">
                       <IconComponent size={24} />
                     </div>
@@ -105,7 +134,7 @@ export default function AboutSection({ profile }) {
             </div>
 
             {/* Quick Quote / Note Card */}
-            <div className="quote-card">
+            <div className="quote-card scroll-reveal" style={{ transitionDelay: '360ms' }}>
               <Lightbulb size={20} className="quote-icon" />
               <p className="quote-text">
                 "Perangkat lunak yang baik bukan hanya yang berhasil dikompilasi, tetapi yang dapat dipahami oleh developer lain dan memberikan nilai nyata bagi penggunanya."

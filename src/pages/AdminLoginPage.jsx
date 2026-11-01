@@ -31,7 +31,7 @@ export default function AdminLoginPage({ onLoginSuccess, navigate, siteSettings 
     setIsLoading(true);
 
     setTimeout(() => {
-      // PRD 6.1: Username/Email and password check (Demo admin: admin / admin123)
+      // Autentikasi Admin: Username/Email and password check (Demo admin: admin / admin123)
       const validUsername = username.trim().toLowerCase();
       if ((validUsername === 'admin' || validUsername === 'admin@portfolio.dev') && password === 'admin123') {
         setAdminAuthStatus(true);
@@ -151,7 +151,7 @@ export default function AdminLoginPage({ onLoginSuccess, navigate, siteSettings 
           <div className="demo-credentials-box">
             <div className="demo-box-header">
               <Sparkles size={16} />
-              <span>Akun Demo Cepat (PRD 6.1)</span>
+              <span>Akun Demo Cepat</span>
             </div>
             <p className="demo-credentials-text">
               Username: <code>admin</code> • Password: <code>admin123</code>

@@ -654,5 +654,24 @@ export function Camera({ size = 18, ...props }) {
   );
 }
 
+export function Copy({ size = 18, ...props }) {
+  return (
+    <SvgIcon size={size} {...props}>
+      <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+    </SvgIcon>
+  );
+}
+
+export function Key({ size = 18, ...props }) {
+  return (
+    <SvgIcon size={size} {...props}>
+      <path d="m21 2-2 2m-1.5 1.5L19 7l-2 2-1.5-1.5" />
+      <circle cx="7.5" cy="15.5" r="5.5" />
+    </SvgIcon>
+  );
+}
+
+
 
 

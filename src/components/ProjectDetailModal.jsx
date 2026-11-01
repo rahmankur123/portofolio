@@ -20,7 +20,7 @@ export default function ProjectDetailModal({ project, onClose }) {
 
   if (!project) return null;
 
-  // Aturan Bisnis PRD 7.2: Tombol Live Demo
+  // Aturan Bisnis: Tombol Live Demo
   const isLiveDemoEligible =
     project.publication_status === 'PUBLISHED' &&
     project.demo_status === 'ONLINE' &&
@@ -142,7 +142,7 @@ export default function ProjectDetailModal({ project, onClose }) {
             )}
           </div>
 
-          {/* Action CTAs complying with PRD Section 7.2 */}
+          {/* Action CTAs */}
           <div className="detail-cta-bar">
             {isLiveDemoEligible ? (
               <a
@@ -178,7 +178,7 @@ export default function ProjectDetailModal({ project, onClose }) {
             )}
           </div>
 
-          {/* Structured Project Documentation (PRD Section 5.1) */}
+          {/* Structured Project Documentation */}
           <div className="detail-sections-container">
             {/* Overview & Problem Statement */}
             <div className="detail-card">
@@ -260,7 +260,7 @@ export default function ProjectDetailModal({ project, onClose }) {
         {/* Modal Footer */}
         <div className="modal-footer">
           <p className="footer-notice">
-            Dokumentasi proyek ini dikelola melalui database CMS (PRD Section 5.1).
+            Dokumentasi proyek ini dikelola secara terstruktur melalui database Content Management System.
           </p>
           <button onClick={onClose} className="btn btn-secondary btn-sm">
             Tutup Jendela

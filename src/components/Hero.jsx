@@ -10,9 +10,9 @@ import {
   Sparkles,
   ExternalLink
 } from './Icons';
-import { GithubIcon, LinkedinIcon } from './BrandIcons';
+import { GithubIcon, LinkedinIcon, InstagramIcon, WhatsAppIcon, TwitterXIcon } from './BrandIcons';
 
-export default function Hero({ profile, siteSettings }) {
+export default function Hero({ profile, siteSettings, socialLinks }) {
   const handleScrollTo = (id) => {
     const el = document.getElementById(id);
     if (el) {
@@ -22,27 +22,43 @@ export default function Hero({ profile, siteSettings }) {
     }
   };
 
+  const getSocialIcon = (platform) => {
+    switch (platform?.toLowerCase()) {
+      case 'github': return <GithubIcon size={18} />;
+      case 'linkedin': return <LinkedinIcon size={18} />;
+      case 'instagram': return <InstagramIcon size={18} />;
+      case 'whatsapp': return <WhatsAppIcon size={18} />;
+      case 'twitter':
+      case 'x': return <TwitterXIcon size={18} />;
+      case 'email':
+      case 'mail': return <Mail size={18} />;
+      default: return <ExternalLink size={18} />;
+    }
+  };
+
   return (
     <section id="hero" className="hero-section">
       <div className="container hero-container">
         {/* Left Column: Headline & Value Proposition */}
         <div className="hero-left">
           {/* Availability Pill Indicator */}
-          <div className="availability-badge">
+          <div className="availability-badge hero-anim-badge">
             <span className="status-dot dot-online" />
             <span className="availability-text">
               {profile?.availability || 'Tersedia untuk Magang & Peluang Kerja'}
             </span>
           </div>
 
-          <h1 className="hero-headline">
-            {siteSettings?.hero_headline_prefix || 'Membangun Antarmuka Web yang'}{' '}
-            <span className="headline-highlight">
+          <h1 className="hero-headline hero-anim-headline">
+            <span className="headline-line hero-anim-headline-line-1">
+              {siteSettings?.hero_headline_prefix || 'Membangun Antarmuka Web yang'}{' '}
+            </span>
+            <span className="headline-highlight headline-line hero-anim-headline-line-2">
               {siteSettings?.hero_headline_highlight || 'Bermakna, Bersih & Terukur.'}
             </span>
           </h1>
 
-          <p className="hero-description">
+          <p className="hero-description hero-anim-description">
             {profile?.short_bio ||
               'Mahasiswa tingkat akhir Manajemen Informatika yang berfokus pada rancang bangun aplikasi web modern, performa tinggi, dan antarmuka ramah pengguna.'}
           </p>
@@ -51,7 +67,7 @@ export default function Hero({ profile, siteSettings }) {
           <div className="hero-actions">
             <button
               onClick={() => handleScrollTo('projects')}
-              className="btn btn-primary"
+              className="btn btn-primary hero-anim-action-1"
             >
               <FolderGit2 size={18} />
               <span>Lihat Proyek Pilihan</span>
@@ -59,7 +75,7 @@ export default function Hero({ profile, siteSettings }) {
 
             <button
               onClick={() => handleScrollTo('contact')}
-              className="btn btn-secondary"
+              className="btn btn-secondary hero-anim-action-2"
             >
               <Mail size={18} />
               <span>Hubungi Saya</span>
@@ -69,9 +85,9 @@ export default function Hero({ profile, siteSettings }) {
               href="#cv"
               onClick={(e) => {
                 e.preventDefault();
-                alert('Mengunduh CV Portofolio Alifian Ramadhan (Format PDF)...');
+                alert('Mengunduh CV Portofolio Rahman Kurniawan (Format PDF)...');
               }}
-              className="btn btn-ghost"
+              className="btn btn-ghost hero-anim-action-3"
               title="Unduh Curriculum Vitae"
             >
               <Download size={17} />
@@ -79,37 +95,61 @@ export default function Hero({ profile, siteSettings }) {
             </a>
           </div>
 
+          {/* Social Quick Bar */}
+          <div className="hero-social-bar hero-anim-action-3">
+            <span className="hero-social-label">Media Sosial:</span>
+            <div className="hero-social-icons">
+              {(socialLinks && socialLinks.length > 0 ? socialLinks : [
+                { id: 1, platform: 'GitHub', url: 'https://github.com/rahmankur123', label: 'GitHub' },
+                { id: 3, platform: 'Instagram', url: 'https://instagram.com/rahmnkrn', label: 'Instagram' },
+                { id: 4, platform: 'WhatsApp', url: 'https://wa.me/6289648920876', label: 'WhatsApp' }
+              ]).map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hero-social-pill"
+                  title={link.label || link.platform}
+                  aria-label={link.platform}
+                >
+                  {getSocialIcon(link.platform)}
+                  <span>{link.platform}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+
           {/* Quick Metrics Banner */}
           <div className="hero-metrics">
-            <div className="metric-item">
-              <span className="metric-number">3.88</span>
-              <span className="metric-label">IPK Manajemen Informatika</span>
+            <div className="metric-item hero-anim-metric-1">
+              <span className="metric-number">3.94</span>
+              <span className="metric-label">IPK Teknologi Rekayasa Perangkat Lunak</span>
             </div>
-            <div className="metric-divider" />
-            <div className="metric-item">
+            <div className="metric-divider hero-anim-metric-2" />
+            <div className="metric-item hero-anim-metric-3">
               <span className="metric-number">8+</span>
               <span className="metric-label">Proyek Web Selesai</span>
             </div>
-            <div className="metric-divider" />
-            <div className="metric-item">
+            <div className="metric-divider hero-anim-metric-4" />
+            <div className="metric-item hero-anim-metric-5">
               <span className="metric-number">&lt; 24h</span>
               <span className="metric-label">Waktu Respons Pesan</span>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Profile Summary Card (PRD 4.2) */}
-        <div className="hero-right">
-          <div className="profile-card card">
+        {/* Right Column: Profile Summary Card */}
+        <div className="hero-right hero-anim-card">
+          <div className="profile-card card hero-float">
             {/* Header / Avatar */}
-            <div className="profile-card-header">
+            <div className="profile-card-header hero-anim-card-inner-1">
               <div className="avatar-wrapper">
                 <img
                   src={profile?.profile_image || profile?.avatar_url}
                   alt={profile?.full_name || 'Foto Profil'}
                   className="profile-avatar-img"
                   onError={(e) => {
-                    // Fallback inisial konsisten jika gambar tidak termuat (PRD 4.2)
                     e.currentTarget.style.display = 'none';
                     if (e.currentTarget.nextSibling) e.currentTarget.nextSibling.style.display = 'flex';
                   }}
@@ -129,7 +169,7 @@ export default function Hero({ profile, siteSettings }) {
             </div>
 
             {/* Profile Meta Details */}
-            <div className="profile-meta-list">
+            <div className="profile-meta-list hero-anim-card-inner-2">
               <div className="profile-meta-item">
                 <MapPin size={16} className="meta-icon" />
                 <span className="meta-text">{profile?.location || 'Surabaya, Indonesia'}</span>
@@ -145,7 +185,7 @@ export default function Hero({ profile, siteSettings }) {
             </div>
 
             {/* Focus Technologies Pill Grid */}
-            <div className="profile-tech-stack">
+            <div className="profile-tech-stack hero-anim-card-inner-3">
               <span className="tech-stack-title">Fokus Teknologi Inti</span>
               <div className="tech-pill-group">
                 <span className="tech-pill">React</span>
@@ -154,34 +194,40 @@ export default function Hero({ profile, siteSettings }) {
                 <span className="tech-pill">MySQL</span>
                 <span className="tech-pill">Vite</span>
                 <span className="tech-pill">REST API</span>
+                <span className="tech-pill">TypeScript</span>
+                <span className="tech-pill">HTML & CSS</span>
+                <span className="tech-pill">PHP</span>
+                <span className="tech-pill">Laravel</span>
+                <span className="tech-pill">Postgresql</span>
               </div>
             </div>
 
             {/* Profile Card Footer / Quick Links */}
-            <div className="profile-card-footer">
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="social-icon-btn"
-                aria-label="GitHub Profile"
-              >
-                <GithubIcon size={18} />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="social-icon-btn"
-                aria-label="LinkedIn Profile"
-              >
-                <LinkedinIcon size={18} />
-              </a>
+            <div className="profile-card-footer hero-anim-card-inner-4">
+              <div className="profile-social-group">
+                {(socialLinks && socialLinks.length > 0 ? socialLinks.slice(0, 4) : [
+                  { id: 1, platform: 'GitHub', url: 'https://github.com/rahmankur123' },
+                  { id: 3, platform: 'Instagram', url: 'https://instagram.com/rahmnkrn' },
+                  { id: 4, platform: 'WhatsApp', url: 'https://wa.me/6289648920876' }
+                ]).map((link) => (
+                  <a
+                    key={link.id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-icon-btn"
+                    title={link.label || link.platform}
+                    aria-label={link.platform}
+                  >
+                    {getSocialIcon(link.platform)}
+                  </a>
+                ))}
+              </div>
               <button
                 onClick={() => handleScrollTo('about')}
                 className="btn btn-ghost btn-sm profile-details-link"
               >
-                <span>Lihat Biografi Lengkap</span>
+                <span>Biografi</span>
                 <ArrowDown size={14} />
               </button>
             </div>
@@ -190,11 +236,187 @@ export default function Hero({ profile, siteSettings }) {
       </div>
 
       <style>{`
+        /* ===================== KEYFRAMES ===================== */
+        @keyframes heroFadeInDown {
+          from {
+            opacity: 0;
+            transform: translateY(-18px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes heroFadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(24px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes heroFadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes heroFadeInLeft {
+          from {
+            opacity: 0;
+            transform: translateX(40px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes heroFloat {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-8px);
+          }
+        }
+
+        @keyframes heroPulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.35);
+          }
+          50% {
+            box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+          }
+        }
+
+        /* ===================== ANIMATION CLASSES ===================== */
+
+        /* Availability badge — fade-in slide-down */
+        .hero-anim-badge {
+          animation: heroFadeInDown 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+        }
+
+        /* Headline line 1 — fade-in slide-up */
+        .hero-anim-headline {
+          overflow: hidden;
+        }
+        .hero-anim-headline-line-1 {
+          display: inline;
+          animation: heroFadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
+        }
+
+        /* Headline line 2 (highlight) — fade-in slide-up staggered */
+        .hero-anim-headline-line-2 {
+          animation: heroFadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+        }
+
+        /* Description — fade-in */
+        .hero-anim-description {
+          animation: heroFadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
+        }
+
+        /* Action buttons — fade-in slide-up staggered */
+        .hero-anim-action-1 {
+          animation: heroFadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both;
+        }
+        .hero-anim-action-2 {
+          animation: heroFadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.75s both;
+        }
+        .hero-anim-action-3 {
+          animation: heroFadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.85s both;
+        }
+
+        /* Metrics — fade-in staggered */
+        .hero-anim-metric-1 {
+          animation: heroFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.9s both;
+        }
+        .hero-anim-metric-2 {
+          animation: heroFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 1.0s both;
+        }
+        .hero-anim-metric-3 {
+          animation: heroFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 1.05s both;
+        }
+        .hero-anim-metric-4 {
+          animation: heroFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 1.15s both;
+        }
+        .hero-anim-metric-5 {
+          animation: heroFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 1.2s both;
+        }
+
+        /* Profile card — fade-in slide-left */
+        .hero-anim-card {
+          animation: heroFadeInLeft 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+        }
+
+        /* Profile card subtle floating */
+        .hero-float {
+          animation: heroFloat 5s ease-in-out infinite;
+          animation-delay: 1.5s;
+        }
+
+        /* Profile card inner elements — stagger fade-in */
+        .hero-anim-card-inner-1 {
+          animation: heroFadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.6s both;
+        }
+        .hero-anim-card-inner-2 {
+          animation: heroFadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.75s both;
+        }
+        .hero-anim-card-inner-3 {
+          animation: heroFadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.9s both;
+        }
+        .hero-anim-card-inner-4 {
+          animation: heroFadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) 1.05s both;
+        }
+
+        /* Status dot pulse */
+        .hero-anim-badge .status-dot.dot-online {
+          animation: heroPulse 2.5s ease-in-out infinite;
+          animation-delay: 1s;
+        }
+
+        /* Reduce motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+          .hero-anim-badge,
+          .hero-anim-headline-line-1,
+          .hero-anim-headline-line-2,
+          .hero-anim-description,
+          .hero-anim-action-1,
+          .hero-anim-action-2,
+          .hero-anim-action-3,
+          .hero-anim-metric-1,
+          .hero-anim-metric-2,
+          .hero-anim-metric-3,
+          .hero-anim-metric-4,
+          .hero-anim-metric-5,
+          .hero-anim-card,
+          .hero-anim-card-inner-1,
+          .hero-anim-card-inner-2,
+          .hero-anim-card-inner-3,
+          .hero-anim-card-inner-4,
+          .hero-float,
+          .hero-anim-badge .status-dot.dot-online {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+          }
+        }
+
+        /* ===================== LAYOUT & DESIGN ===================== */
+
         .hero-section {
           padding-top: 3.5rem;
           padding-bottom: 5rem;
           border-bottom: 1px solid var(--border-subtle);
           background: linear-gradient(180deg, rgba(232, 241, 236, 0.3) 0%, rgba(247, 247, 243, 0) 100%);
+          overflow: hidden;
         }
 
         @media (min-width: 992px) {
@@ -260,7 +482,7 @@ export default function Hero({ profile, siteSettings }) {
         .headline-highlight {
           color: var(--primary-green);
           position: relative;
-          display: inline-block;
+          display: inline;
         }
 
         .hero-description {
@@ -454,6 +676,58 @@ export default function Hero({ profile, siteSettings }) {
           background-color: var(--primary-green-light);
           color: var(--primary-green);
           border: 1px solid var(--primary-green-border);
+        }
+
+        .hero-social-bar {
+          display: flex;
+          align-items: center;
+          gap: 0.85rem;
+          margin-bottom: 2rem;
+          flex-wrap: wrap;
+        }
+
+        .hero-social-label {
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .hero-social-icons {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
+
+        .hero-social-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.45rem;
+          padding: 0.35rem 0.75rem;
+          border-radius: var(--radius-full);
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: var(--text-secondary);
+          background-color: var(--bg-surface);
+          border: 1px solid var(--border-default);
+          box-shadow: var(--shadow-xs);
+          transition: all var(--transition-fast);
+        }
+
+        .hero-social-pill:hover {
+          color: var(--primary-green);
+          border-color: var(--primary-green-border);
+          background-color: var(--primary-green-light);
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-sm);
+        }
+
+        .profile-social-group {
+          display: flex;
+          align-items: center;
+          gap: 0.45rem;
         }
 
         .profile-card-footer {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Briefcase,
   Calendar,
@@ -9,6 +9,31 @@ import {
 } from './Icons';
 
 export default function ExperienceSection({ experiences }) {
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    const section = sectionRef.current;
+    if (section) {
+      const revealElements = section.querySelectorAll(
+        '.scroll-reveal, .experience-card'
+      );
+      revealElements.forEach((el) => observer.observe(el));
+    }
+
+    return () => observer.disconnect();
+  }, [experiences]);
+
   const getExperienceTypeBadge = (type) => {
     switch (type?.toLowerCase()) {
       case 'magang':
@@ -25,10 +50,10 @@ export default function ExperienceSection({ experiences }) {
   };
 
   return (
-    <section id="pengalaman" className="section experience-section">
+    <section id="pengalaman" className="section experience-section" ref={sectionRef}>
       <div className="container">
         {/* Header */}
-        <div className="section-header">
+        <div className="section-header scroll-reveal">
           <div className="section-tag">
             <Briefcase size={14} />
             <span>Riwayat Pengalaman</span>
@@ -42,8 +67,12 @@ export default function ExperienceSection({ experiences }) {
         {/* Experience List */}
         <div className="experience-list">
           {experiences && experiences.length > 0 ? (
-            experiences.map((item) => (
-              <div key={item.id} className="experience-card card">
+            experiences.map((item, index) => (
+              <div
+                key={item.id}
+                className="experience-card card scroll-reveal"
+                style={{ transitionDelay: `${index * 0.15}s` }}
+              >
                 {/* Header row */}
                 <div className="exp-header-row">
                   <div className="exp-title-group">

@@ -59,17 +59,24 @@ export default function Navbar({ profile, onOpenAdmin, siteSettings }) {
     }
   };
 
+  const getInitials = (name) => {
+    if (!name) return 'RK';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
   return (
     <header className={`navbar-wrapper ${isScrolled ? 'navbar-scrolled' : ''}`}>
       <div className="container navbar-container">
         {/* Brand / Logo */}
         <a href="#hero" onClick={(e) => handleNavClick(e, 'hero')} className="navbar-brand">
           <div className="brand-logo-badge">
-            <span>AR</span>
+            <span>{getInitials(profile?.full_name || siteSettings?.owner_name || 'Rahman Kurniawan')}</span>
           </div>
           <div className="brand-text">
-            <span className="brand-name">{profile?.full_name || 'Alifian Ramadhan'}</span>
-            <span className="brand-role">Web Developer</span>
+            <span className="brand-name">{siteSettings?.site_title || profile?.full_name || 'Rahman Kurniawan'}</span>
+            <span className="brand-role">{profile?.headline || 'Web Developer'}</span>
           </div>
         </a>
 
@@ -89,15 +96,16 @@ export default function Navbar({ profile, onOpenAdmin, siteSettings }) {
 
         {/* Actions */}
         <div className="navbar-actions">
-          {/* Admin CMS Preview Button (PRD simulation) */}
-          <button
+          {/* Admin CMS Button */}
+          {/*<button
             onClick={onOpenAdmin}
             className="btn btn-secondary btn-sm admin-toggle-btn"
-            title="Buka Simulasi CMS Admin Panel (PRD Bagian 6)"
+            title="Dashboard Admin"
           >
             <Sliders size={15} />
-            <span className="desktop-only-inline">Admin Preview</span>
+            <span className="desktop-only-inline">Admin</span>
           </button>
+          */}
 
           <a
             href="#contact"
@@ -138,7 +146,7 @@ export default function Navbar({ profile, onOpenAdmin, siteSettings }) {
             </div>
 
             <div className="mobile-drawer-footer">
-              <button
+              {/*<button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   onOpenAdmin();
@@ -146,8 +154,8 @@ export default function Navbar({ profile, onOpenAdmin, siteSettings }) {
                 className="btn btn-secondary btn-sm full-width"
               >
                 <Sliders size={16} />
-                <span>Buka Admin CMS Panel</span>
-              </button>
+                <span>Dashboard Admin</span>
+              </button>*/}
 
               <a
                 href="#contact"

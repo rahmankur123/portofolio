@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   Sliders,
@@ -32,6 +32,9 @@ import {
 import { THEME_PRESETS, defaultTheme } from '../services/portfolioStorage';
 import ImageUploaderWithCrop from './ImageUploaderWithCrop';
 import ImageCropModal from './ImageCropModal';
+import SupabaseConfigCard from './SupabaseConfigCard';
+import TechStackInput from './TechStackInput';
+import AITextGeneratorModal, { AIAssistTriggerButton } from './AITextGeneratorModal';
 
 export default function AdminPreviewModal({
   isOpen,
@@ -77,6 +80,14 @@ export default function AdminPreviewModal({
 
   const [editingEdu, setEditingEdu] = useState(null);
   const [editingExp, setEditingExp] = useState(null);
+  const [aiModal, setAiModal] = useState({
+    isOpen: false,
+    fieldType: '',
+    fieldLabel: '',
+    context: {},
+    currentValue: '',
+    onApply: () => {}
+  });
 
   // Local draft states for forms
   const [themeForm, setThemeForm] = useState(theme || defaultTheme);
@@ -84,20 +95,27 @@ export default function AdminPreviewModal({
   const [settingsForm, setSettingsForm] = useState(siteSettings || {});
   const [socialsForm, setSocialsForm] = useState(socialLinks || []);
 
+  const isDirtyRef = useRef({
+    theme: false,
+    profile: false,
+    settings: false,
+    socials: false
+  });
+
   useEffect(() => {
-    if (theme) setThemeForm(theme);
+    if (theme && !isDirtyRef.current.theme) setThemeForm(theme);
   }, [theme]);
 
   useEffect(() => {
-    if (profile) setProfileForm(profile);
+    if (profile && !isDirtyRef.current.profile) setProfileForm(profile);
   }, [profile]);
 
   useEffect(() => {
-    if (siteSettings) setSettingsForm(siteSettings);
+    if (siteSettings && !isDirtyRef.current.settings) setSettingsForm(siteSettings);
   }, [siteSettings]);
 
   useEffect(() => {
-    if (socialLinks) setSocialsForm(socialLinks);
+    if (socialLinks && !isDirtyRef.current.socials) setSocialsForm(socialLinks);
   }, [socialLinks]);
 
   if (!isOpen) return null;
@@ -142,12 +160,14 @@ export default function AdminPreviewModal({
   // Handler: Save Profile
   const handleSaveProfile = (e) => {
     e.preventDefault();
+    isDirtyRef.current.profile = false;
     onUpdateProfile(profileForm);
   };
 
   // Handler: Save Site Settings
   const handleSaveSettings = (e) => {
     e.preventDefault();
+    isDirtyRef.current.settings = false;
     onUpdateSiteSettings(settingsForm);
   };
 
@@ -582,7 +602,7 @@ export default function AdminPreviewModal({
                     <label className="picker-label">Warna Dasar Latar Halaman (Background):</label>
                     <div className="bg-options-row">
                       {[
-                        { label: 'Off-White (PRD)', val: '#F7F7F3' },
+                        { label: 'Off-White Ivory', val: '#F7F7F3' },
                         { label: 'Clean White', val: '#FFFFFF' },
                         { label: 'Warm Ivory', val: '#FAF8F5' },
                         { label: 'Soft Slate', val: '#F8FAFC' }
@@ -611,9 +631,10 @@ export default function AdminPreviewModal({
                     <input
                       type="text"
                       value={settingsForm.site_title || ''}
-                      onChange={(e) =>
-                        setSettingsForm({ ...settingsForm, site_title: e.target.value })
-                      }
+                      onChange={(e) => {
+                        isDirtyRef.current.settings = true;
+                        setSettingsForm({ ...settingsForm, site_title: e.target.value });
+                      }}
                       className="form-input"
                     />
                   </div>
@@ -623,9 +644,10 @@ export default function AdminPreviewModal({
                     <input
                       type="text"
                       value={settingsForm.hero_badge_text || ''}
-                      onChange={(e) =>
-                        setSettingsForm({ ...settingsForm, hero_badge_text: e.target.value })
-                      }
+                      onChange={(e) => {
+                        isDirtyRef.current.settings = true;
+                        setSettingsForm({ ...settingsForm, hero_badge_text: e.target.value });
+                      }}
                       className="form-input"
                     />
                   </div>
@@ -635,9 +657,10 @@ export default function AdminPreviewModal({
                     <input
                       type="text"
                       value={settingsForm.hero_headline_prefix || ''}
-                      onChange={(e) =>
-                        setSettingsForm({ ...settingsForm, hero_headline_prefix: e.target.value })
-                      }
+                      onChange={(e) => {
+                        isDirtyRef.current.settings = true;
+                        setSettingsForm({ ...settingsForm, hero_headline_prefix: e.target.value });
+                      }}
                       className="form-input"
                     />
                   </div>
@@ -647,9 +670,10 @@ export default function AdminPreviewModal({
                     <input
                       type="text"
                       value={settingsForm.hero_headline_highlight || ''}
-                      onChange={(e) =>
-                        setSettingsForm({ ...settingsForm, hero_headline_highlight: e.target.value })
-                      }
+                      onChange={(e) => {
+                        isDirtyRef.current.settings = true;
+                        setSettingsForm({ ...settingsForm, hero_headline_highlight: e.target.value });
+                      }}
                       className="form-input"
                     />
                   </div>
@@ -659,9 +683,10 @@ export default function AdminPreviewModal({
                     <input
                       type="text"
                       value={settingsForm.footer_text || ''}
-                      onChange={(e) =>
-                        setSettingsForm({ ...settingsForm, footer_text: e.target.value })
-                      }
+                      onChange={(e) => {
+                        isDirtyRef.current.settings = true;
+                        setSettingsForm({ ...settingsForm, footer_text: e.target.value });
+                      }}
                       className="form-input"
                     />
                   </div>
@@ -683,7 +708,7 @@ export default function AdminPreviewModal({
           {activeTab === 'profile' && (
             <div className="cms-tab-pane">
               <form onSubmit={handleSaveProfile} className="cms-section-card cms-form-grid">
-                <h3 className="cms-card-title full-width">Data Profil Publik (PRD Bagian 4.2 & 4.3)</h3>
+                <h3 className="cms-card-title full-width">Data Profil Publik</h3>
 
                 <div className="form-field">
                   <label className="field-label">Nama Lengkap</label>
@@ -696,7 +721,23 @@ export default function AdminPreviewModal({
                 </div>
 
                 <div className="form-field">
-                  <label className="field-label">Headline Profesi</label>
+                  <div className="label-with-ai-row">
+                    <label className="field-label">Headline Profesi</label>
+                    <AIAssistTriggerButton
+                      label="✨ AI Headline"
+                      small
+                      onClick={() =>
+                        setAiModal({
+                          isOpen: true,
+                          fieldType: 'profile_headline',
+                          fieldLabel: 'Headline Profesi',
+                          context: profileForm,
+                          currentValue: profileForm.headline || '',
+                          onApply: (text) => setProfileForm((prev) => ({ ...prev, headline: text }))
+                        })
+                      }
+                    />
+                  </div>
                   <input
                     type="text"
                     value={profileForm.headline || ''}
@@ -763,7 +804,23 @@ export default function AdminPreviewModal({
                 </div>
 
                 <div className="form-field full-width">
-                  <label className="field-label">Deskripsi Singkat (Hero Section)</label>
+                  <div className="label-with-ai-row">
+                    <label className="field-label">Deskripsi Singkat (Hero Section)</label>
+                    <AIAssistTriggerButton
+                      label="✨ Generate Ringkasan AI"
+                      small
+                      onClick={() =>
+                        setAiModal({
+                          isOpen: true,
+                          fieldType: 'profile_short_bio',
+                          fieldLabel: 'Deskripsi Singkat (Hero)',
+                          context: profileForm,
+                          currentValue: profileForm.short_bio || '',
+                          onApply: (text) => setProfileForm((prev) => ({ ...prev, short_bio: text }))
+                        })
+                      }
+                    />
+                  </div>
                   <textarea
                     rows={3}
                     value={profileForm.short_bio || ''}
@@ -773,7 +830,23 @@ export default function AdminPreviewModal({
                 </div>
 
                 <div className="form-field full-width">
-                  <label className="field-label">Biografi Lengkap (About Section)</label>
+                  <div className="label-with-ai-row">
+                    <label className="field-label">Biografi Lengkap (About Section)</label>
+                    <AIAssistTriggerButton
+                      label="✨ Generate Biografi AI"
+                      small
+                      onClick={() =>
+                        setAiModal({
+                          isOpen: true,
+                          fieldType: 'profile_about',
+                          fieldLabel: 'Biografi Lengkap (About)',
+                          context: profileForm,
+                          currentValue: profileForm.about_content || '',
+                          onApply: (text) => setProfileForm((prev) => ({ ...prev, about_content: text }))
+                        })
+                      }
+                    />
+                  </div>
                   <textarea
                     rows={6}
                     value={profileForm.about_content || ''}
@@ -845,7 +918,7 @@ export default function AdminPreviewModal({
                   </div>
 
                   <div className="form-field">
-                    <label className="field-label">Status Publikasi (PRD 7.1)</label>
+                    <label className="field-label">Status Publikasi</label>
                     <select
                       value={editingProject.publication_status || 'PUBLISHED'}
                       onChange={(e) =>
@@ -859,7 +932,7 @@ export default function AdminPreviewModal({
                   </div>
 
                   <div className="form-field">
-                    <label className="field-label">Status Live Demo (PRD 7.2)</label>
+                    <label className="field-label">Status Live Demo</label>
                     <select
                       value={editingProject.demo_status || 'ONLINE'}
                       onChange={(e) =>
@@ -895,6 +968,16 @@ export default function AdminPreviewModal({
                         setEditingProject({ ...editingProject, repository_url: e.target.value })
                       }
                       className="form-input"
+                    />
+                  </div>
+
+                  {/* Tumpukan Teknologi (Tech Stack) */}
+                  <div className="form-field full-width">
+                    <TechStackInput
+                      technologies={editingProject.technologies || []}
+                      onChange={(techs) =>
+                        setEditingProject({ ...editingProject, technologies: techs })
+                      }
                     />
                   </div>
 
@@ -1132,24 +1215,74 @@ export default function AdminPreviewModal({
                   />
 
                   <div className="form-field full-width">
-                    <label className="field-label">Ringkasan Singkat (Kartu Proyek)</label>
+                    <div className="label-with-ai-row">
+                      <label className="field-label">Ringkasan Singkat (Kartu Proyek)</label>
+                      <AIAssistTriggerButton
+                        label="✨ Generate Ringkasan AI"
+                        small
+                        onClick={() =>
+                          setAiModal({
+                            isOpen: true,
+                            fieldType: 'project_summary',
+                            fieldLabel: 'Ringkasan Singkat Proyek',
+                            context: editingProject,
+                            currentValue: editingProject.short_description || editingProject.summary || '',
+                            onApply: (text) =>
+                              setEditingProject((prev) => ({
+                                ...prev,
+                                short_description: text,
+                                summary: text
+                              }))
+                          })
+                        }
+                      />
+                    </div>
                     <textarea
                       rows={2}
                       value={editingProject.short_description || ''}
                       onChange={(e) =>
-                        setEditingProject({ ...editingProject, short_description: e.target.value })
+                        setEditingProject({
+                          ...editingProject,
+                          short_description: e.target.value,
+                          summary: e.target.value
+                        })
                       }
                       className="form-textarea"
                     />
                   </div>
 
                   <div className="form-field full-width">
-                    <label className="field-label">Latar Belakang & Masalah (Problem Statement)</label>
+                    <div className="label-with-ai-row">
+                      <label className="field-label">Latar Belakang & Masalah (Problem Statement)</label>
+                      <AIAssistTriggerButton
+                        label="✨ Generate Deskripsi AI"
+                        small
+                        onClick={() =>
+                          setAiModal({
+                            isOpen: true,
+                            fieldType: 'project_description',
+                            fieldLabel: 'Latar Belakang & Masalah Proyek',
+                            context: editingProject,
+                            currentValue: editingProject.problem_statement || editingProject.description || '',
+                            onApply: (text) =>
+                              setEditingProject((prev) => ({
+                                ...prev,
+                                problem_statement: text,
+                                description: text
+                              }))
+                          })
+                        }
+                      />
+                    </div>
                     <textarea
                       rows={3}
                       value={editingProject.problem_statement || ''}
                       onChange={(e) =>
-                        setEditingProject({ ...editingProject, problem_statement: e.target.value })
+                        setEditingProject({
+                          ...editingProject,
+                          problem_statement: e.target.value,
+                          description: e.target.value
+                        })
                       }
                       className="form-textarea"
                     />
@@ -1689,6 +1822,9 @@ export default function AdminPreviewModal({
              ======================================================== */}
           {activeTab === 'socials' && (
             <div className="cms-tab-pane">
+              {/* Database Supabase Integration Card */}
+              <SupabaseConfigCard />
+
               <form onSubmit={handleSaveSocials} className="cms-section-card cms-form-grid">
                 <h3 className="cms-card-title full-width">Kelola Tautan Sosial (Social Links)</h3>
 
@@ -1720,7 +1856,7 @@ export default function AdminPreviewModal({
               <div className="cms-section-card danger-zone">
                 <h4 className="danger-title">Reset Seluruh Konten & Warna ke Bawaan</h4>
                 <p className="danger-desc">
-                  Mengembalikan data dan warna landing page kembali ke standar awal dokumen PRD.
+                  Mengembalikan data dan warna landing page kembali ke standar pengaturan awal.
                 </p>
                 <button
                   type="button"
@@ -1728,7 +1864,7 @@ export default function AdminPreviewModal({
                   className="btn btn-secondary btn-sm danger-reset-btn"
                 >
                   <RefreshCw size={14} />
-                  <span>Reset ke Data Awal PRD</span>
+                  <span>Reset ke Data Awal</span>
                 </button>
               </div>
             </div>
@@ -1746,7 +1882,26 @@ export default function AdminPreviewModal({
         </div>
       </div>
 
+      {/* AI Text Generator Modal */}
+      <AITextGeneratorModal
+        isOpen={aiModal.isOpen}
+        onClose={() => setAiModal((prev) => ({ ...prev, isOpen: false }))}
+        fieldType={aiModal.fieldType}
+        fieldLabel={aiModal.fieldLabel}
+        context={aiModal.context}
+        currentValue={aiModal.currentValue}
+        onApply={aiModal.onApply}
+      />
+
       <style>{`
+        .label-with-ai-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 0.35rem;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
         .cms-admin-modal {
           max-width: 960px;
           display: flex;

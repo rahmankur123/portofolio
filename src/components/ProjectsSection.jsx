@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   FolderGit2,
   ExternalLink,
@@ -12,7 +12,31 @@ import {
 import { GithubIcon } from './BrandIcons';
 
 export default function ProjectsSection({ projects, onSelectProject }) {
+  const sectionRef = useRef(null);
   const [filterCategory, setFilterCategory] = useState('ALL');
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    const section = sectionRef.current;
+    if (section) {
+      const revealElements = section.querySelectorAll(
+        '.scroll-reveal, .scroll-reveal-left, .scroll-reveal-right, .project-card'
+      );
+      revealElements.forEach((el) => observer.observe(el));
+    }
+
+    return () => observer.disconnect();
+  }, [projects, filterCategory]);
 
   // Filter categories
   const categories = ['ALL', ...new Set(projects.map((p) => p.category).filter(Boolean))];
@@ -55,10 +79,10 @@ export default function ProjectsSection({ projects, onSelectProject }) {
   };
 
   return (
-    <section id="projects" className="section projects-section">
+    <section id="projects" className="section projects-section" ref={sectionRef}>
       <div className="container">
         {/* Header */}
-        <div className="section-header">
+        <div className="section-header scroll-reveal">
           <div className="section-tag">
             <FolderGit2 size={14} />
             <span>Portofolio Proyek</span>
@@ -70,7 +94,7 @@ export default function ProjectsSection({ projects, onSelectProject }) {
         </div>
 
         {/* Filter bar */}
-        <div className="projects-filter-bar">
+        <div className="projects-filter-bar scroll-reveal">
           <div className="filter-pill-group">
             {categories.map((cat) => (
               <button
@@ -91,15 +115,19 @@ export default function ProjectsSection({ projects, onSelectProject }) {
         {/* Projects Grid */}
         <div className="projects-grid">
           {filteredProjects && filteredProjects.length > 0 ? (
-            filteredProjects.map((project) => {
-              // Aturan Bisnis PRD 7.2
+            filteredProjects.map((project, index) => {
+              // Aturan Bisnis Live Demo
               const isLiveDemoEligible =
                 project.publication_status === 'PUBLISHED' &&
                 project.demo_status === 'ONLINE' &&
                 Boolean(project.live_url?.trim());
 
               return (
-                <div key={project.id} className="project-card card">
+                <div
+                  key={project.id}
+                  className="project-card card"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
                   {/* Card Cover */}
                   <div className="project-cover-wrapper" onClick={() => onSelectProject(project)}>
                     <img
@@ -129,7 +157,7 @@ export default function ProjectsSection({ projects, onSelectProject }) {
                       </h3>
                     </div>
 
-                    <p className="project-card-desc">{project.short_description}</p>
+                    <p className="project-card-desc">{project.short_description || project.summary}</p>
 
                     {/* Tech Pills */}
                     <div className="project-tech-tags">
@@ -173,7 +201,7 @@ export default function ProjectsSection({ projects, onSelectProject }) {
                             className="btn btn-secondary btn-sm btn-disabled"
                             title={
                               project.demo_status === 'MAINTENANCE'
-                                ? 'Demo sedang masa perbaikan (PRD 7.2)'
+                                ? 'Demo sedang dalam pemeliharaan sistem'
                                 : 'Demo tidak tersedia'
                             }
                           >

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   GraduationCap,
   Calendar,
@@ -8,11 +8,36 @@ import {
 } from './Icons';
 
 export default function EducationSection({ educations }) {
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    const section = sectionRef.current;
+    if (section) {
+      const revealElements = section.querySelectorAll(
+        '.scroll-reveal, .timeline-item'
+      );
+      revealElements.forEach((el) => observer.observe(el));
+    }
+
+    return () => observer.disconnect();
+  }, [educations]);
+
   return (
-    <section id="pendidikan" className="section education-section">
+    <section id="pendidikan" className="section education-section" ref={sectionRef}>
       <div className="container">
         {/* Header */}
-        <div className="section-header">
+        <div className="section-header scroll-reveal">
           <div className="section-tag">
             <GraduationCap size={14} />
             <span>Riwayat Pendidikan</span>
@@ -27,7 +52,11 @@ export default function EducationSection({ educations }) {
         <div className="education-timeline">
           {educations && educations.length > 0 ? (
             educations.map((item, index) => (
-              <div key={item.id} className="timeline-item">
+              <div
+                key={item.id}
+                className="timeline-item scroll-reveal"
+                style={{ transitionDelay: `${index * 0.15}s` }}
+              >
                 {/* Timeline Axis & Dot */}
                 <div className="timeline-axis">
                   <div className={`timeline-dot ${item.is_current ? 'dot-active' : ''}`}>

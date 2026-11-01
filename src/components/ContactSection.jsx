@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Send,
   Mail,
@@ -14,6 +14,8 @@ import {
 import { submitContactMessage } from '../services/portfolioStorage';
 
 export default function ContactSection({ profile, onMessageSent }) {
+  const sectionRef = useRef(null);
+
   const [formData, setFormData] = useState({
     sender_name: '',
     sender_email: '',
@@ -24,6 +26,29 @@ export default function ContactSection({ profile, onMessageSent }) {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successStatus, setSuccessStatus] = useState(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    const section = sectionRef.current;
+    if (section) {
+      const revealElements = section.querySelectorAll(
+        '.scroll-reveal, .scroll-reveal-left, .scroll-reveal-right'
+      );
+      revealElements.forEach((el) => observer.observe(el));
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const validate = () => {
     const errs = {};
@@ -92,10 +117,10 @@ export default function ContactSection({ profile, onMessageSent }) {
   };
 
   return (
-    <section id="contact" className="section contact-section">
+    <section id="contact" className="section contact-section" ref={sectionRef}>
       <div className="container">
         {/* Header */}
-        <div className="section-header">
+        <div className="section-header scroll-reveal">
           <div className="section-tag">
             <MessageSquare size={14} />
             <span>Kirim Pesan</span>
@@ -108,7 +133,7 @@ export default function ContactSection({ profile, onMessageSent }) {
 
         <div className="contact-layout-grid">
           {/* Left: Contact Form Card */}
-          <div className="contact-form-card card">
+          <div className="contact-form-card card scroll-reveal-left" style={{ transitionDelay: '100ms' }}>
             <h3 className="form-card-title">Formulir Komunikasi Langsung</h3>
 
             {successStatus && (
@@ -226,7 +251,7 @@ export default function ContactSection({ profile, onMessageSent }) {
 
                 <div className="privacy-guarantee">
                   <ShieldCheck size={16} />
-                  <span>Validasi & penyimpanan data terlindungi (PRD 5.3)</span>
+                  <span>Data Anda aman & terenkripsi</span>
                 </div>
               </div>
             </form>
@@ -234,7 +259,7 @@ export default function ContactSection({ profile, onMessageSent }) {
 
           {/* Right: Info Cards */}
           <div className="contact-info-column">
-            <div className="info-card card">
+            <div className="info-card card scroll-reveal-right" style={{ transitionDelay: '200ms' }}>
               <h4 className="info-card-title">Saluran Komunikasi</h4>
               <p className="info-card-sub">
                 Saya selalu terbuka untuk berdiskusi seputar peluang kerja sama atau proyek teknologi.

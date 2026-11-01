@@ -44,6 +44,12 @@ import {
 } from './services/portfolioStorage';
 
 import {
+  syncCredentialsFromServer,
+  isSupabaseConfigured,
+  getSupabaseClient
+} from './services/supabaseClient';
+
+import {
   initialProfile,
   initialEducations,
   initialExperiences,
@@ -152,10 +158,13 @@ export default function App() {
   const [projects, setProjects] = useState(() => {
     try {
       const saved = localStorage.getItem('portfolio_projects_v1');
-      const list = saved ? JSON.parse(saved) : initialProjects;
-      return Array.isArray(list)
-        ? list.filter((p) => p.publication_status === 'PUBLISHED').sort((a, b) => a.sort_order - b.sort_order)
-        : initialProjects.filter((p) => p.publication_status === 'PUBLISHED');
+      if (saved !== null) {
+        const list = JSON.parse(saved);
+        if (Array.isArray(list)) {
+          return list.filter((p) => p.publication_status === 'PUBLISHED').sort((a, b) => a.sort_order - b.sort_order);
+        }
+      }
+      return initialProjects.filter((p) => p.publication_status === 'PUBLISHED');
     } catch {
       return initialProjects.filter((p) => p.publication_status === 'PUBLISHED');
     }
@@ -186,8 +195,11 @@ export default function App() {
   const [allAdminProjects, setAllAdminProjects] = useState(() => {
     try {
       const saved = localStorage.getItem('portfolio_projects_v1');
-      const list = saved ? JSON.parse(saved) : initialProjects;
-      return Array.isArray(list) ? list : initialProjects;
+      if (saved !== null) {
+        const list = JSON.parse(saved);
+        if (Array.isArray(list)) return list;
+      }
+      return initialProjects;
     } catch {
       return initialProjects;
     }
@@ -214,7 +226,13 @@ export default function App() {
     }, 3800);
   };
 
-  // Reload data from storage
+  // Update document title dynamically whenever site title or profile changes
+  useEffect(() => {
+    const title = siteSettings?.site_title || (profile?.full_name ? `${profile.full_name} — Web Developer & UI Designer` : 'Personal Portfolio');
+    document.title = title;
+  }, [siteSettings?.site_title, profile?.full_name]);
+
+  // Reload data from storage safely (only update states if content actually changed)
   const loadData = async () => {
     try {
       const [
@@ -241,18 +259,23 @@ export default function App() {
         fetchThemeSettings()
       ]);
 
-      setProfile(profData);
-      setEducations(eduData);
-      setExperiences(expData);
-      setSkillCategories(skillsData);
-      setProjects(projData);
-      setSiteSettings(settingsData);
-      setSocialLinks(socialData);
-      setAllAdminProjects(adminProjData);
-      setAdminMessages(adminMsgData);
+      setProfile((prev) => (JSON.stringify(prev) !== JSON.stringify(profData) ? profData : prev));
+      setEducations((prev) => (JSON.stringify(prev) !== JSON.stringify(eduData) ? eduData : prev));
+      setExperiences((prev) => (JSON.stringify(prev) !== JSON.stringify(expData) ? expData : prev));
+      setSkillCategories((prev) => (JSON.stringify(prev) !== JSON.stringify(skillsData) ? skillsData : prev));
+      setProjects((prev) => (JSON.stringify(prev) !== JSON.stringify(projData) ? projData : prev));
+      setSiteSettings((prev) => (JSON.stringify(prev) !== JSON.stringify(settingsData) ? settingsData : prev));
+      setSocialLinks((prev) => (JSON.stringify(prev) !== JSON.stringify(socialData) ? socialData : prev));
+      setAllAdminProjects((prev) => (JSON.stringify(prev) !== JSON.stringify(adminProjData) ? adminProjData : prev));
+      setAdminMessages((prev) => (JSON.stringify(prev) !== JSON.stringify(adminMsgData) ? adminMsgData : prev));
       if (themeData) {
-        setTheme(themeData);
-        applyThemeToDocument(themeData);
+        setTheme((prev) => {
+          if (JSON.stringify(prev) !== JSON.stringify(themeData)) {
+            applyThemeToDocument(themeData);
+            return themeData;
+          }
+          return prev;
+        });
       }
     } catch (err) {
       console.error('Gagal memuat data portofolio:', err);
@@ -260,7 +283,49 @@ export default function App() {
   };
 
   useEffect(() => {
-    loadData();
+    let realtimeChannel = null;
+    let isSubscribed = true;
+
+    const setupSyncAndRealtime = async () => {
+      // 1. Sinkronkan kredensial dari server
+      await syncCredentialsFromServer();
+
+      // 2. Muat data aktual dari Supabase / LocalStorage sekali saat awal buka
+      if (isSubscribed) {
+        await loadData();
+      }
+
+      // 3. Pasang pendengar Realtime Supabase (hanya update saat ada event perubahan nyata dari DB)
+      if (isSupabaseConfigured()) {
+        const supabase = getSupabaseClient();
+        if (supabase) {
+          try {
+            realtimeChannel = supabase
+              .channel('portfolio-sync-channel')
+              .on('postgres_changes', { event: '*', schema: 'public' }, () => {
+                if (isSubscribed) {
+                  loadData();
+                }
+              })
+              .subscribe();
+          } catch (e) {
+            console.warn('Realtime channel subscribe failed:', e);
+          }
+        }
+      }
+    };
+
+    setupSyncAndRealtime();
+
+    return () => {
+      isSubscribed = false;
+      if (realtimeChannel && isSupabaseConfigured()) {
+        const supabase = getSupabaseClient();
+        if (supabase) {
+          supabase.removeChannel(realtimeChannel);
+        }
+      }
+    };
   }, []);
 
   // Real-time Handlers for CMS
@@ -320,7 +385,7 @@ export default function App() {
   const handleTogglePublish = async (id) => {
     const updated = await toggleProjectPublicationStatus(id);
     setAllAdminProjects(updated);
-    // Refresh public projects list (PRD Section 7.1: only published projects)
+    // Refresh public projects
     const publicOnly = updated.filter((p) => p.publication_status === 'PUBLISHED');
     setProjects(publicOnly);
 
@@ -357,7 +422,7 @@ export default function App() {
   };
 
   const handleResetData = () => {
-    if (window.confirm('Apakah Anda yakin ingin mengembalikan seluruh data dan tema warna ke standar awal PRD?')) {
+    if (window.confirm('Apakah Anda yakin ingin mengembalikan seluruh data dan tema ke pengaturan awal?')) {
       resetAllDataToDefault();
       setTheme(defaultTheme);
       applyThemeToDocument(defaultTheme);
@@ -472,31 +537,31 @@ export default function App() {
         siteSettings={siteSettings}
       />
 
-      {/* 2. Hero Section & Profile Card (PRD 4.2) */}
-      <Hero profile={profile} siteSettings={siteSettings} />
+      {/* Hero Section */}
+      <Hero profile={profile} siteSettings={siteSettings} socialLinks={socialLinks} />
 
-      {/* 3. About Section (PRD 4.3) */}
+      {/* About Section */}
       <AboutSection profile={profile} />
 
-      {/* 4. Education Timeline (PRD 4.4) */}
+      {/* Education Timeline */}
       <EducationSection educations={educations} />
 
-      {/* 5. Experience Timeline (PRD 4.5) */}
+      {/* Experience Timeline */}
       <ExperienceSection experiences={experiences} />
 
-      {/* 6. Skills Section by Category (PRD 4.6) */}
+      {/* Skills Section */}
       <SkillsSection skillCategories={skillCategories} />
 
-      {/* 7. Projects Section (PRD 4.7 & 7.1 & 7.2) */}
+      {/* Projects Section */}
       <ProjectsSection
         projects={projects}
         onSelectProject={(proj) => setSelectedProject(proj)}
       />
 
-      {/* 8. Contact Form Section (PRD 5.3) */}
+      {/* Contact Form */}
       <ContactSection profile={profile} onMessageSent={handleMessageSent} />
 
-      {/* 9. Footer (PRD 4.8) */}
+      {/* Footer */}
       <Footer
         profile={profile}
         socialLinks={socialLinks}
@@ -505,7 +570,7 @@ export default function App() {
       />
 
       {/* Modals */}
-      {/* A. Comprehensive Project Documentation Modal (PRD 5.1) */}
+      {/* Project Detail Modal */}
       {selectedProject && (
         <ProjectDetailModal
           project={selectedProject}
@@ -513,7 +578,7 @@ export default function App() {
         />
       )}
 
-      {/* B. Admin CMS Playground Modal (PRD Section 6) - also accessible via modal if opened */}
+      {/* Admin Preview Modal */}
       <AdminPreviewModal
         isOpen={isAdminOpen}
         onClose={() => setIsAdminOpen(false)}
@@ -542,7 +607,7 @@ export default function App() {
       />
 
       {/* Floating Admin Trigger Pill - Direct route to /admin */}
-      <div className="floating-admin-trigger">
+      {/*<div className="floating-admin-trigger">
         <button
           onClick={() => navigate('/admin')}
           className="admin-floating-btn"
@@ -556,7 +621,7 @@ export default function App() {
             </span>
           )}
         </button>
-      </div>
+      </div>*/}
 
       {/* Toast Feedback */}
       {toast && (

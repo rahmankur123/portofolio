@@ -1,43 +1,97 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  Code2,
-  FileCode,
-  Layout,
-  Palette,
-  Zap,
-  Terminal,
-  Server,
-  Database,
-  Globe,
-  ShieldCheck,
-  Layers,
-  GitBranch,
-  Send,
-  Code,
-  Cpu,
-  Sparkles,
-  CheckCircle
+  Code2, FileCode, Layout, Palette, Zap, Terminal, Server, Database,
+  Globe, ShieldCheck, Layers, GitBranch, Send, Code, Cpu, Sparkles, CheckCircle
 } from './Icons';
 import { FigmaIcon } from './BrandIcons';
 
 const ICON_MAP = {
-  Code2,
-  FileCode,
-  Layout,
-  Palette,
-  Zap,
-  Terminal,
-  Server,
-  Database,
-  Globe,
-  ShieldCheck,
-  Layers,
-  GitBranch,
-  Send,
-  Figma: FigmaIcon,
-  Code,
-  Cpu
+  Code2, FileCode, Layout, Palette, Zap, Terminal, Server, Database,
+  Globe, ShieldCheck, Layers, GitBranch, Send, Figma: FigmaIcon, Code, Cpu
 };
+
+const getProficiencyPercentage = (skill) => {
+  if (typeof skill?.percentage === 'number') return skill.percentage;
+  switch (skill?.proficiency?.toLowerCase()) {
+    case 'mahir': return 90;
+    case 'cukup': return 75;
+    case 'dasar': return 50;
+    default: return 70;
+  }
+};
+
+const getProficiencyLabel = (level) => {
+  switch (level?.toLowerCase()) {
+    case 'mahir': return 'Advanced';
+    case 'cukup': return 'Intermediate';
+    case 'dasar': return 'Beginner';
+    default: return level || 'Practiced';
+  }
+};
+
+function SkillProgressRow({ skill, index }) {
+  const rowRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const percentage = getProficiencyPercentage(skill);
+  const IconComp = ICON_MAP[skill.icon] || Code;
+
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const staggerDelay = index * 0.1;
+
+  return (
+    <div
+      ref={rowRef}
+      className="skill-progress-row"
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'translateY(0)' : 'translateY(18px)',
+        transition: `opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${staggerDelay}s, transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${staggerDelay}s`,
+      }}
+    >
+      <div className="skill-row-header">
+        <div className="skill-row-icon">
+          <IconComp size={18} />
+        </div>
+        <div className="skill-row-info">
+          <span className="skill-row-name">{skill.name}</span>
+          <span className="skill-row-level">{getProficiencyLabel(skill.proficiency)}</span>
+        </div>
+        <span className="skill-row-percentage">{percentage}%</span>
+      </div>
+
+      <div className="progress-track">
+        <div
+          className="progress-fill"
+          style={{
+            width: isVisible ? `${percentage}%` : '0%',
+            transitionDelay: `${staggerDelay + 0.2}s`,
+          }}
+        />
+      </div>
+
+      {skill.note && (
+        <p className="skill-row-note">{skill.note}</p>
+      )}
+    </div>
+  );
+}
 
 export default function SkillsSection({ skillCategories }) {
   const [selectedCategoryId, setSelectedCategoryId] = useState('ALL');
@@ -46,19 +100,6 @@ export default function SkillsSection({ skillCategories }) {
     selectedCategoryId === 'ALL'
       ? skillCategories
       : skillCategories.filter((cat) => cat.id === selectedCategoryId);
-
-  const getProficiencyBadge = (level) => {
-    switch (level?.toLowerCase()) {
-      case 'mahir':
-        return <span className="proficiency-badge badge-mahir">Mahir</span>;
-      case 'cukup':
-        return <span className="proficiency-badge badge-cukup">Cukup</span>;
-      case 'dasar':
-        return <span className="proficiency-badge badge-dasar">Dasar</span>;
-      default:
-        return <span className="proficiency-badge">{level || 'Terlatih'}</span>;
-    }
-  };
 
   return (
     <section id="skills" className="section skills-section">
@@ -69,9 +110,9 @@ export default function SkillsSection({ skillCategories }) {
             <Cpu size={14} />
             <span>Keahlian & Tooling</span>
           </div>
-          <h2 className="section-title">Kompilasi Keterampilan Teknis</h2>
+          <h2 className="section-title">Keterampilan Teknis</h2>
           <p className="section-subtitle">
-            Keahlian diukur berdasarkan pengalaman praktik nyata dalam proyek, bukan persentase angka yang tidak terukur (PRD 4.6).
+            Keahlian diukur berdasarkan pengalaman praktik nyata dalam berbagai proyek dan studi kasus profesional.
           </p>
         </div>
 
@@ -94,7 +135,7 @@ export default function SkillsSection({ skillCategories }) {
           ))}
         </div>
 
-        {/* Categories & Skills Grid */}
+        {/* Categories & Skills Progress Bars */}
         <div className="skills-categories-wrapper">
           {filteredCategories.map((category) => (
             <div key={category.id} className="category-block">
@@ -103,36 +144,21 @@ export default function SkillsSection({ skillCategories }) {
                 <p className="category-block-desc">{category.description}</p>
               </div>
 
-              <div className="skills-grid">
-                {category.skills?.map((skill) => {
-                  const IconComp = ICON_MAP[skill.icon] || Code;
-                  return (
-                    <div key={skill.id} className="skill-card card">
-                      <div className="skill-card-top">
-                        <div className="skill-icon-wrapper">
-                          <IconComp size={22} />
-                        </div>
-                        <div className="skill-header-meta">
-                          <h4 className="skill-name">{skill.name}</h4>
-                          {getProficiencyBadge(skill.proficiency)}
-                        </div>
-                      </div>
-
-                      <p className="skill-note">{skill.note || skill.description}</p>
-                    </div>
-                  );
-                })}
+              <div className="skills-progress-list">
+                {category.skills?.map((skill, idx) => (
+                  <SkillProgressRow key={skill.id} skill={skill} index={idx} />
+                ))}
               </div>
             </div>
           ))}
         </div>
 
-        {/* PRD Best Practice Note Banner */}
+        {/* Professional Note Banner */}
         <div className="skills-guideline-banner">
           <div className="guideline-content">
             <CheckCircle size={18} className="guideline-icon" />
             <p className="guideline-text">
-              <strong>Standar Transparansi:</strong> Seluruh keahlian di atas telah dibuktikan melalui dokumentasi kode dan arsitektur pada daftar proyek di bawah.
+              <strong>Verified Skills:</strong> Seluruh keahlian di atas telah dibuktikan melalui dokumentasi kode dan arsitektur pada daftar proyek di bawah.
             </p>
           </div>
         </div>
@@ -159,6 +185,7 @@ export default function SkillsSection({ skillCategories }) {
           background-color: var(--bg-surface);
           border: 1px solid var(--border-default);
           transition: all var(--transition-fast);
+          cursor: pointer;
         }
 
         .cat-tab-btn:hover {
@@ -180,7 +207,7 @@ export default function SkillsSection({ skillCategories }) {
         }
 
         .category-block-header {
-          margin-bottom: 1.25rem;
+          margin-bottom: 1.5rem;
         }
 
         .category-block-title {
@@ -195,47 +222,37 @@ export default function SkillsSection({ skillCategories }) {
           margin-top: 0.25rem;
         }
 
-        .skills-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 1.25rem;
-        }
+        /* ── Progress Bar Skill Rows ── */
 
-        @media (min-width: 640px) {
-          .skills-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .skills-grid {
-            grid-template-columns: repeat(3, 1fr);
-          }
-        }
-
-        .skill-card {
-          padding: 1.4rem;
+        .skills-progress-list {
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
-          transition: all var(--transition-fast);
+          gap: 1.1rem;
         }
 
-        .skill-card:hover {
-          transform: translateY(-2px);
+        .skill-progress-row {
+          background: var(--bg-surface);
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-lg);
+          padding: 1.15rem 1.35rem;
+          transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        .skill-progress-row:hover {
           border-color: var(--primary-green-border);
+          box-shadow: 0 2px 12px rgba(23, 99, 77, 0.08);
         }
 
-        .skill-card-top {
+        .skill-row-header {
           display: flex;
           align-items: center;
-          gap: 1rem;
-          margin-bottom: 0.85rem;
+          gap: 0.75rem;
+          margin-bottom: 0.65rem;
         }
 
-        .skill-icon-wrapper {
-          width: 44px;
-          height: 44px;
+        .skill-row-icon {
+          width: 36px;
+          height: 36px;
           border-radius: var(--radius-md);
           background-color: var(--primary-green-light);
           color: var(--primary-green);
@@ -246,51 +263,92 @@ export default function SkillsSection({ skillCategories }) {
           border: 1px solid var(--primary-green-border);
         }
 
-        .skill-header-meta {
+        .skill-row-info {
           display: flex;
           flex-direction: column;
-          gap: 0.25rem;
+          gap: 0.1rem;
+          flex: 1;
+          min-width: 0;
         }
 
-        .skill-name {
-          font-size: 1.05rem;
+        .skill-row-name {
+          font-size: 0.975rem;
           font-weight: 700;
           color: var(--text-primary);
+          line-height: 1.3;
         }
 
-        .proficiency-badge {
-          display: inline-block;
-          font-size: 0.7rem;
-          font-weight: 700;
+        .skill-row-level {
+          font-size: 0.72rem;
+          font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.04em;
-          padding: 0.15rem 0.5rem;
-          border-radius: var(--radius-sm);
-          width: fit-content;
+          color: var(--text-tertiary, var(--text-secondary));
+          opacity: 0.75;
         }
 
-        .badge-mahir {
-          background-color: var(--status-online-bg);
-          color: var(--status-online-text);
-          border: 1px solid rgba(16, 185, 129, 0.3);
+        .skill-row-percentage {
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: var(--primary-green);
+          flex-shrink: 0;
+          font-variant-numeric: tabular-nums;
+          min-width: 40px;
+          text-align: right;
         }
 
-        .badge-cukup {
-          background-color: #FEF3C7;
-          color: #92400E;
-          border: 1px solid rgba(245, 158, 11, 0.3);
+        /* ── Track & Fill ── */
+
+        .progress-track {
+          width: 100%;
+          height: 8px;
+          background-color: var(--border-default, #e5e7eb);
+          border-radius: 999px;
+          overflow: hidden;
+          position: relative;
         }
 
-        .badge-dasar {
-          background-color: #F3F4F6;
-          color: #4B5563;
+        .progress-fill {
+          height: 100%;
+          border-radius: 999px;
+          background: linear-gradient(90deg, var(--primary-green), #10B981 70%, #34D399 100%);
+          width: 0%;
+          transition: width 1.2s cubic-bezier(0.22, 0.61, 0.36, 1);
+          position: relative;
+          box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
         }
 
-        .skill-note {
-          font-size: 0.85rem;
-          line-height: 1.55;
+        .progress-fill::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          border-radius: 999px;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.35),
+            transparent
+          );
+          animation: progressShimmer 2.5s infinite;
+        }
+
+        @keyframes progressShimmer {
+          0% { left: -100%; }
+          50%, 100% { left: 100%; }
+        }
+
+        .skill-row-note {
+          font-size: 0.82rem;
+          line-height: 1.5;
           color: var(--text-secondary);
+          margin-top: 0.55rem;
+          opacity: 0.85;
         }
+
+        /* ── Banner ── */
 
         .skills-guideline-banner {
           margin-top: 3rem;
@@ -318,6 +376,22 @@ export default function SkillsSection({ skillCategories }) {
 
         .guideline-text strong {
           color: var(--text-primary);
+        }
+
+        /* ── Responsive ── */
+
+        @media (min-width: 640px) {
+          .skills-progress-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.1rem;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .skills-progress-list {
+            grid-template-columns: repeat(2, 1fr);
+          }
         }
       `}</style>
     </section>

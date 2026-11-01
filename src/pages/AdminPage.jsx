@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Sliders,
   CheckCircle2,
@@ -35,6 +35,9 @@ import {
 import { THEME_PRESETS, defaultTheme, setAdminAuthStatus } from '../services/portfolioStorage';
 import ImageUploaderWithCrop from '../components/ImageUploaderWithCrop';
 import ImageCropModal from '../components/ImageCropModal';
+import SupabaseConfigCard from '../components/SupabaseConfigCard';
+import TechStackInput from '../components/TechStackInput';
+import AITextGeneratorModal, { AIAssistTriggerButton } from '../components/AITextGeneratorModal';
 
 export default function AdminPage({
   navigate,
@@ -78,6 +81,14 @@ export default function AdminPage({
 
   const [editingEdu, setEditingEdu] = useState(null);
   const [editingExp, setEditingExp] = useState(null);
+  const [aiModal, setAiModal] = useState({
+    isOpen: false,
+    fieldType: '',
+    fieldLabel: '',
+    context: {},
+    currentValue: '',
+    onApply: () => {}
+  });
 
   // Local draft states
   const [themeForm, setThemeForm] = useState(theme || defaultTheme);
@@ -85,20 +96,27 @@ export default function AdminPage({
   const [settingsForm, setSettingsForm] = useState(siteSettings || {});
   const [socialsForm, setSocialsForm] = useState(socialLinks || []);
 
+  const isDirtyRef = useRef({
+    theme: false,
+    profile: false,
+    settings: false,
+    socials: false
+  });
+
   useEffect(() => {
-    if (theme) setThemeForm(theme);
+    if (theme && !isDirtyRef.current.theme) setThemeForm(theme);
   }, [theme]);
 
   useEffect(() => {
-    if (profile) setProfileForm(profile);
+    if (profile && !isDirtyRef.current.profile) setProfileForm(profile);
   }, [profile]);
 
   useEffect(() => {
-    if (siteSettings) setSettingsForm(siteSettings);
+    if (siteSettings && !isDirtyRef.current.settings) setSettingsForm(siteSettings);
   }, [siteSettings]);
 
   useEffect(() => {
-    if (socialLinks) setSocialsForm(socialLinks);
+    if (socialLinks && !isDirtyRef.current.socials) setSocialsForm(socialLinks);
   }, [socialLinks]);
 
   // Handler: Apply Theme Preset
@@ -140,18 +158,21 @@ export default function AdminPage({
   // Handler: Save Profile
   const handleSaveProfile = (e) => {
     e.preventDefault();
+    isDirtyRef.current.profile = false;
     onUpdateProfile(profileForm);
   };
 
   // Handler: Save Site Settings
   const handleSaveSettings = (e) => {
     e.preventDefault();
+    isDirtyRef.current.settings = false;
     onUpdateSiteSettings(settingsForm);
   };
 
   // Handler: Save Socials
   const handleSaveSocials = (e) => {
     e.preventDefault();
+    isDirtyRef.current.socials = false;
     onUpdateSocialLinks(socialsForm);
   };
 
@@ -622,7 +643,7 @@ export default function AdminPage({
             <div className="admin-tab-pane">
               <div className="pane-header">
                 <div>
-                  <h2 className="pane-title">Ringkasan Sistem &amp; Portofolio (PRD 6.2)</h2>
+                  <h2 className="pane-title">Ringkasan Sistem &amp; Portofolio</h2>
                   <p className="pane-sub">
                     Statistik konten terkini, status publikasi proyek, dan pintasan modul manajemen.
                   </p>
@@ -852,7 +873,7 @@ export default function AdminPage({
                 <label className="cms-label">3. Warna Latar Belakang (Background Tint)</label>
                 <div className="bg-preset-row">
                   {[
-                    { label: 'Off-White Ivory (Standar PRD)', value: '#F7F7F3' },
+                    { label: 'Off-White Ivory (Standar)', value: '#F7F7F3' },
                     { label: 'Pure White Clean', value: '#FFFFFF' },
                     { label: 'Soft Cool Mint', value: '#F2F8F5' },
                     { label: 'Light Slate Gray', value: '#F8FAFC' },
@@ -901,7 +922,7 @@ export default function AdminPage({
             <div className="admin-tab-pane">
               <div className="pane-header">
                 <div>
-                  <h2 className="pane-title">Manajemen Profil &amp; Hero (PRD 4.2 &amp; 4.3)</h2>
+                  <h2 className="pane-title">Manajemen Profil &amp; Hero</h2>
                   <p className="pane-sub">
                     Ubah teks headline, nama lengkap, ringkasan hero, dan biografi lengkap yang tampil di landing page.
                   </p>
@@ -921,7 +942,23 @@ export default function AdminPage({
                 </div>
 
                 <div className="cms-form-field">
-                  <label className="cms-label">Headline Profesi (Hero Subtitle)</label>
+                  <div className="label-with-ai-row">
+                    <label className="cms-label">Headline Profesi (Hero Subtitle)</label>
+                    <AIAssistTriggerButton
+                      label="✨ AI Headline"
+                      small
+                      onClick={() =>
+                        setAiModal({
+                          isOpen: true,
+                          fieldType: 'profile_headline',
+                          fieldLabel: 'Headline Profesi',
+                          context: profileForm,
+                          currentValue: profileForm.headline || '',
+                          onApply: (text) => setProfileForm((prev) => ({ ...prev, headline: text }))
+                        })
+                      }
+                    />
+                  </div>
                   <input
                     type="text"
                     value={profileForm.headline || ''}
@@ -987,21 +1024,75 @@ export default function AdminPage({
                 </div>
 
                 <div className="cms-form-field full-width">
-                  <label className="cms-label">Ringkasan Hero (Deskripsi Singkat di Header)</label>
+                  <div className="label-with-ai-row">
+                    <label className="cms-label">Ringkasan Hero (Deskripsi Singkat di Header)</label>
+                    <AIAssistTriggerButton
+                      label="✨ Generate Ringkasan AI"
+                      small
+                      onClick={() =>
+                        setAiModal({
+                          isOpen: true,
+                          fieldType: 'profile_short_bio',
+                          fieldLabel: 'Ringkasan Hero / Bio Singkat',
+                          context: profileForm,
+                          currentValue: profileForm.summary || profileForm.short_bio || '',
+                          onApply: (text) =>
+                            setProfileForm((prev) => ({
+                              ...prev,
+                              summary: text,
+                              short_bio: text
+                            }))
+                        })
+                      }
+                    />
+                  </div>
                   <textarea
                     rows={3}
-                    value={profileForm.summary || ''}
-                    onChange={(e) => setProfileForm({ ...profileForm, summary: e.target.value })}
+                    value={profileForm.summary || profileForm.short_bio || ''}
+                    onChange={(e) =>
+                      setProfileForm({
+                        ...profileForm,
+                        summary: e.target.value,
+                        short_bio: e.target.value
+                      })
+                    }
                     className="cms-textarea"
                   />
                 </div>
 
                 <div className="cms-form-field full-width">
-                  <label className="cms-label">Biografi Lengkap (Section Tentang Saya)</label>
+                  <div className="label-with-ai-row">
+                    <label className="cms-label">Biografi Lengkap (Section Tentang Saya)</label>
+                    <AIAssistTriggerButton
+                      label="✨ Generate Biografi AI"
+                      small
+                      onClick={() =>
+                        setAiModal({
+                          isOpen: true,
+                          fieldType: 'profile_about',
+                          fieldLabel: 'Biografi Lengkap (Tentang Saya)',
+                          context: profileForm,
+                          currentValue: profileForm.bio || profileForm.about_content || '',
+                          onApply: (text) =>
+                            setProfileForm((prev) => ({
+                              ...prev,
+                              bio: text,
+                              about_content: text
+                            }))
+                        })
+                      }
+                    />
+                  </div>
                   <textarea
                     rows={6}
-                    value={profileForm.bio || ''}
-                    onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
+                    value={profileForm.bio || profileForm.about_content || ''}
+                    onChange={(e) =>
+                      setProfileForm({
+                        ...profileForm,
+                        bio: e.target.value,
+                        about_content: e.target.value
+                      })
+                    }
                     className="cms-textarea"
                   />
                 </div>
@@ -1021,7 +1112,7 @@ export default function AdminPage({
             <div className="admin-tab-pane">
               <div className="pane-header">
                 <div>
-                  <h2 className="pane-title">Manajemen Proyek Portofolio (PRD 4.7 &amp; 7.1)</h2>
+                  <h2 className="pane-title">Manajemen Proyek Portofolio</h2>
                   <p className="pane-sub">
                     Kelola proyek portofolio, status publikasi (*Draft/Published*), status *Live Demo*, dan dokumentasi lengkap.
                   </p>
@@ -1066,7 +1157,7 @@ export default function AdminPage({
                     </div>
 
                     <div className="cms-form-field">
-                      <label className="cms-label">Status Publikasi (PRD 7.1)</label>
+                      <label className="cms-label">Status Publikasi</label>
                       <select
                         value={editingProject.publication_status || 'PUBLISHED'}
                         onChange={(e) =>
@@ -1080,7 +1171,7 @@ export default function AdminPage({
                     </div>
 
                     <div className="cms-form-field">
-                      <label className="cms-label">Status Live Demo (PRD 7.2)</label>
+                      <label className="cms-label">Status Live Demo</label>
                       <select
                         value={editingProject.demo_status || 'ONLINE'}
                         onChange={(e) =>
@@ -1116,22 +1207,78 @@ export default function AdminPage({
                       />
                     </div>
 
+                    {/* Tumpukan Teknologi (Tech Stack) */}
                     <div className="cms-form-field full-width">
-                      <label className="cms-label">Ringkasan Singkat (Muncul di Kartu Portofolio)</label>
+                      <TechStackInput
+                        technologies={editingProject.technologies || []}
+                        onChange={(techs) =>
+                          setEditingProject({ ...editingProject, technologies: techs })
+                        }
+                      />
+                    </div>
+
+                    <div className="cms-form-field full-width">
+                      <div className="label-with-ai-row">
+                        <label className="cms-label">Ringkasan Singkat (Muncul di Kartu Portofolio)</label>
+                        <AIAssistTriggerButton
+                          label="✨ Generate Ringkasan AI"
+                          small
+                          onClick={() =>
+                            setAiModal({
+                              isOpen: true,
+                              fieldType: 'project_summary',
+                              fieldLabel: 'Ringkasan Singkat Proyek',
+                              context: editingProject,
+                              currentValue: editingProject.summary || editingProject.short_description || '',
+                              onApply: (text) =>
+                                setEditingProject((prev) => ({
+                                  ...prev,
+                                  summary: text,
+                                  short_description: text
+                                }))
+                            })
+                          }
+                        />
+                      </div>
                       <textarea
                         rows={2}
-                        value={editingProject.summary || ''}
-                        onChange={(e) => setEditingProject({ ...editingProject, summary: e.target.value })}
+                        value={editingProject.summary || editingProject.short_description || ''}
+                        onChange={(e) =>
+                          setEditingProject({
+                            ...editingProject,
+                            summary: e.target.value,
+                            short_description: e.target.value
+                          })
+                        }
                         className="cms-textarea"
                       />
                     </div>
 
                     <div className="cms-form-field full-width">
-                      <label className="cms-label">Deskripsi Lengkap / Masalah &amp; Solusi (Detail Modal)</label>
+                      <div className="label-with-ai-row">
+                        <label className="cms-label">Deskripsi Lengkap / Masalah &amp; Solusi (Detail Modal)</label>
+                        <AIAssistTriggerButton
+                          label="✨ Generate Studi Kasus AI"
+                          small
+                          onClick={() =>
+                            setAiModal({
+                              isOpen: true,
+                              fieldType: 'project_description',
+                              fieldLabel: 'Deskripsi & Studi Kasus Proyek',
+                              context: editingProject,
+                              currentValue: editingProject.description || '',
+                              onApply: (text) =>
+                                setEditingProject((prev) => ({ ...prev, description: text }))
+                            })
+                          }
+                        />
+                      </div>
                       <textarea
-                        rows={4}
+                        rows={6}
                         value={editingProject.description || ''}
-                        onChange={(e) => setEditingProject({ ...editingProject, description: e.target.value })}
+                        onChange={(e) =>
+                          setEditingProject({ ...editingProject, description: e.target.value })
+                        }
                         className="cms-textarea"
                       />
                     </div>
@@ -1167,7 +1314,7 @@ export default function AdminPage({
                       />
                     </div>
 
-                    {/* ================= GALERI FOTO & THUMBNAIL (PRD Bagian 5 & 6.4) ================= */}
+                    {/* ================= GALERI FOTO & THUMBNAIL ================= */}
                     <div className="cms-form-field full-width gallery-management-field">
                       <div className="gallery-header-row">
                         <div>
@@ -1451,7 +1598,7 @@ export default function AdminPage({
             <div className="admin-tab-pane">
               <div className="pane-header">
                 <div>
-                  <h2 className="pane-title">Riwayat Pendidikan (PRD 4.4)</h2>
+                  <h2 className="pane-title">Riwayat Pendidikan</h2>
                   <p className="pane-sub">
                     Kelola data studi, universitas, gelar, jurusan, serta pencapaian akademik.
                   </p>
@@ -1530,7 +1677,24 @@ export default function AdminPage({
                       />
                     </div>
                     <div className="cms-form-field full-width">
-                      <label className="cms-label">Deskripsi &amp; Pencapaian (IPK, Fokus Studi)</label>
+                      <div className="label-with-ai-row">
+                        <label className="cms-label">Deskripsi &amp; Pencapaian (IPK, Fokus Studi)</label>
+                        <AIAssistTriggerButton
+                          label="✨ Generate Deskripsi AI"
+                          small
+                          onClick={() =>
+                            setAiModal({
+                              isOpen: true,
+                              fieldType: 'education_description',
+                              fieldLabel: 'Deskripsi Pendidikan & Akademik',
+                              context: editingEdu,
+                              currentValue: editingEdu.description || '',
+                              onApply: (text) =>
+                                setEditingEdu((prev) => ({ ...prev, description: text }))
+                            })
+                          }
+                        />
+                      </div>
                       <textarea
                         rows={3}
                         value={editingEdu.description || ''}
@@ -1591,7 +1755,7 @@ export default function AdminPage({
             <div className="admin-tab-pane">
               <div className="pane-header">
                 <div>
-                  <h2 className="pane-title">Pengalaman Kerja &amp; Organisasi (PRD 4.5)</h2>
+                  <h2 className="pane-title">Pengalaman Kerja &amp; Organisasi</h2>
                   <p className="pane-sub">
                     Kelola riwayat karir, magang, freelance, atau organisasi kemahasiswaan.
                   </p>
@@ -1666,7 +1830,30 @@ export default function AdminPage({
                       />
                     </div>
                     <div className="cms-form-field full-width">
-                      <label className="cms-label">Poin-poin Pencapaian (1 baris per poin)</label>
+                      <div className="label-with-ai-row">
+                        <label className="cms-label">Poin-poin Pencapaian (1 baris per poin)</label>
+                        <AIAssistTriggerButton
+                          label="✨ Generate Capaian AI"
+                          small
+                          onClick={() =>
+                            setAiModal({
+                              isOpen: true,
+                              fieldType: 'experience_description',
+                              fieldLabel: 'Pencapaian & Tanggung Jawab Pengalaman',
+                              context: editingExp,
+                              currentValue: (editingExp.achievements || []).join('\n') || editingExp.description || '',
+                              onApply: (text) => {
+                                const lines = text.split('\n').filter((l) => l.trim().length > 0);
+                                setEditingExp((prev) => ({
+                                  ...prev,
+                                  description: text,
+                                  achievements: lines
+                                }));
+                              }
+                            })
+                          }
+                        />
+                      </div>
                       <textarea
                         rows={4}
                         value={(editingExp.achievements || []).join('\n')}
@@ -1737,7 +1924,7 @@ export default function AdminPage({
             <div className="admin-tab-pane">
               <div className="pane-header">
                 <div>
-                  <h2 className="pane-title">Kotak Masuk Kontak (PRD 5.3 &amp; 6.2)</h2>
+                  <h2 className="pane-title">Kotak Masuk Kontak</h2>
                   <p className="pane-sub">
                     Pesan yang dikirimkan oleh recruiter atau klien melalui formulir kontak publik.
                   </p>
@@ -1802,12 +1989,15 @@ export default function AdminPage({
             <div className="admin-tab-pane">
               <div className="pane-header">
                 <div>
-                  <h2 className="pane-title">Tautan Sosial &amp; Identitas Situs (PRD 4.8)</h2>
+                  <h2 className="pane-title">Tautan Sosial &amp; Identitas Situs</h2>
                   <p className="pane-sub">
-                    Atur link akun GitHub, LinkedIn, Instagram, dan reset data portofolio bila diperlukan.
+                    Kelola basis data Supabase, link akun media sosial, identitas website, dan opsi reset.
                   </p>
                 </div>
               </div>
+
+              {/* Database Supabase Integration Card */}
+              <SupabaseConfigCard />
 
               <form onSubmit={handleSaveSettings} className="cms-form-grid">
                 <div className="cms-form-field">
@@ -1815,7 +2005,10 @@ export default function AdminPage({
                   <input
                     type="text"
                     value={settingsForm.site_title || ''}
-                    onChange={(e) => setSettingsForm({ ...settingsForm, site_title: e.target.value })}
+                    onChange={(e) => {
+                      isDirtyRef.current.settings = true;
+                      setSettingsForm({ ...settingsForm, site_title: e.target.value });
+                    }}
                     className="cms-input"
                   />
                 </div>
@@ -1825,9 +2018,10 @@ export default function AdminPage({
                   <input
                     type="text"
                     value={settingsForm.footer_copyright || ''}
-                    onChange={(e) =>
-                      setSettingsForm({ ...settingsForm, footer_copyright: e.target.value })
-                    }
+                    onChange={(e) => {
+                      isDirtyRef.current.settings = true;
+                      setSettingsForm({ ...settingsForm, footer_copyright: e.target.value });
+                    }}
                     className="cms-input"
                   />
                 </div>
@@ -1873,7 +2067,7 @@ export default function AdminPage({
               <div className="danger-zone-box">
                 <h3 className="danger-title">Zona Bahaya: Reset Database</h3>
                 <p className="danger-desc">
-                  Mengembalikan seluruh data profil, proyek, pendidikan, dan tema warna kembali ke pengaturan awal standar PRD.
+                  Mengembalikan seluruh data profil, proyek, pendidikan, dan tema warna kembali ke pengaturan awal default.
                 </p>
                 <button type="button" onClick={onResetData} className="btn-danger-reset">
                   <RefreshCw size={16} />
@@ -1885,7 +2079,26 @@ export default function AdminPage({
         </main>
       </div>
 
+      {/* AI Text Generator Modal */}
+      <AITextGeneratorModal
+        isOpen={aiModal.isOpen}
+        onClose={() => setAiModal((prev) => ({ ...prev, isOpen: false }))}
+        fieldType={aiModal.fieldType}
+        fieldLabel={aiModal.fieldLabel}
+        context={aiModal.context}
+        currentValue={aiModal.currentValue}
+        onApply={aiModal.onApply}
+      />
+
       <style>{`
+        .label-with-ai-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 0.35rem;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
         .admin-page-container {
           min-height: 100vh;
           display: flex;
